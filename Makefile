@@ -13,6 +13,10 @@ else ifneq ($(findstring win,$(shell uname -a)),)
    platform = win
 else ifneq ($(findstring arm,$(shell uname -a)),)
     PLATFLAGS +=  -DARM  -marm
+else ifneq ($(findstring aarch64,$(shell uname -a)),)
+    PLATFLAGS += -Ofast -DARM -flto=4 \
+           -fmerge-all-constants -fno-math-errno -march=armv8-a \
+            -mtune=cortex-a72.cortex-a53
 endif
 endif
 
@@ -82,6 +86,16 @@ else ifeq ($(platform), classic_armv8_a35)
    CFLAGS += -Ofast -DARM -flto=4 \
            -fmerge-all-constants -fno-math-errno -march=armv8-a \
            -marm -mtune=cortex-a35 -mfpu=neon-fp-armv8 -mfloat-abi=hard
+   LDFLAGS += -static-libgcc -static-libstdc++
+
+else ifeq ($(platform), classic_armv8_a72_a53)
+   TARGET := $(TARGET_NAME)_libretro.so
+   fpic := -fPIC
+   SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T  -Wl,--no-undefined
+   LDFLAGS += -lm -lrt -lpthread -ldl
+   CFLAGS += -Ofast -DARM -flto=4 \
+           -fmerge-all-constants -fno-math-errno -march=armv8-a \
+            -mtune=cortex-a72.cortex-a53
    LDFLAGS += -static-libgcc -static-libstdc++
 
 else ifeq ($(platform), osx)
